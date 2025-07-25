@@ -1,4 +1,4 @@
-# 🧩 ComfyUI Aspect Ratio Nodes
+# 🧩 ComfyUI-Studio-Nodes
 
 A collection of utility nodes for ComfyUI including:
 
