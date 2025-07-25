@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='comfyui-aspect-ratio-nodes',
+    name='ComfyUI-Studio-nodes',
     version='0.1.0',
     description='A set of aspect ratio tools for ComfyUI: resizing, label generation, and markdown export.',
     author='Your Name',
