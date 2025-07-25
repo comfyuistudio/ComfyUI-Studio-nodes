@@ -11,4 +11,4 @@ A collection of utility nodes for ComfyUI including:
 Clone into your `ComfyUI/custom_nodes/` folder:
 
 ```bash
-git clone https://github.com/yourname/comfyui-aspect-ratio-nodes.git
+git clone https://github.com/yourname/ComfyUI-Studio-nodes.git
