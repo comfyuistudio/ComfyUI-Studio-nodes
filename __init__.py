@@ -9,7 +9,7 @@ class AspectRatioImageSize:
         return {
             "required": {
                 "width": ("INT", {
-                    "default": 512, "min": 64, "max": 4096, "step": 8
+                    "default": 512, "min": 64, "max": 4096, "step": 16
                 }),
                 "aspect_ratio": ([
                     "1:1", "16:9", "5:4", "4:3", "3:2",
@@ -42,8 +42,9 @@ class AspectRatioImageSize:
         return width, height, f"{width}x{height}"
 
 import numpy as np
-from PIL import Image
 import folder_paths
+import torch
+from PIL import Image
 
 class AspectRatioResizeImage:
     @classmethod
@@ -51,7 +52,7 @@ class AspectRatioResizeImage:
         return {
             "required": {
                 "image": ("IMAGE",),
-                "width": ("INT", {"default": 512, "min": 64, "max": 4096, "step": 8}),
+                "width": ("INT", {"default": 512, "min": 64, "max": 4096, "step": 16}),
                 "aspect_ratio": ([
                     "1:1", "16:9", "5:4", "4:3", "3:2",
                     "2.39:1", "21:9", "18:9", "17:9", "1.85:1"
@@ -66,10 +67,14 @@ class AspectRatioResizeImage:
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "STRING")
-    RETURN_NAMES = ("resized_image", "resolution_label")
+    RETURN_TYPES = ("IMAGE", "INT", "INT", "STRING")
+    RETURN_NAMES = ("resized_image", "width", "height", "resolution_label")
     FUNCTION = "resize_image"
     CATEGORY = "image/resize"
+
+    def make_divisible_by_16(self, value):
+        """Round value to nearest multiple of 16"""
+        return int(round(value / 16) * 16)
 
     def resize_image(self, image, width, aspect_ratio, direction, crop_method, info):
         # Aspect ratio dictionary
@@ -83,8 +88,13 @@ class AspectRatioResizeImage:
         if direction == "Vertical":
             w_ratio, h_ratio = h_ratio, w_ratio
 
+        # Calculate target dimensions and make them divisible by 16
         target_height = int(round(width * h_ratio / w_ratio))
         target_width = width
+        
+        # Ensure dimensions are divisible by 16
+        target_width = self.make_divisible_by_16(target_width)
+        target_height = self.make_divisible_by_16(target_height)
 
         # ComfyUI image format is BHWC (batch, height, width, channels)
         # Extract the first image from the batch
@@ -130,35 +140,8 @@ class AspectRatioResizeImage:
         # Add batch dimension back: (H, W, C) -> (1, H, W, C)
         resized_tensor = torch.from_numpy(resized_np).unsqueeze(0)
 
-        return (resized_tensor, f"{target_width}x{target_height}")
+        return (resized_tensor, target_width, target_height, f"{target_width}x{target_height}")
 
-# Node mapping for ComfyUI
-NODE_CLASS_MAPPINGS = {
-    "AspectRatioResizeImage": AspectRatioResizeImage
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "AspectRatioResizeImage": "Aspect Ratio Resize Image"
-}
-
-# Node mapping for ComfyUI
-NODE_CLASS_MAPPINGS = {
-    "AspectRatioResizeImage": AspectRatioResizeImage
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "AspectRatioResizeImage": "Aspect Ratio Resize Image"
-}
-
-
-# Node mapping for ComfyUI
-NODE_CLASS_MAPPINGS = {
-    "AspectRatioResizeImage": AspectRatioResizeImage
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "AspectRatioResizeImage": "Aspect Ratio Resize Image"
-}
 
 # 📄 3. Markdown Link Generator (optional example)
 class MarkdownModelNote:
