@@ -2,6 +2,7 @@ import numpy as np
 import folder_paths
 import torch
 from PIL import Image
+
 # 🧩 1. Aspect Ratio Image Size Calculator
 class AspectRatioImageSize:
     @classmethod
@@ -9,18 +10,16 @@ class AspectRatioImageSize:
         return {
             "required": {
                 "width": ("INT", {
-                    "default": 512, "min": 64, "max": 4096, "step": 16
+                    "default": 0, "min": 0, "max": 4096, "step": 16
+                }),
+                "height": ("INT", {
+                    "default": 0, "min": 0, "max": 4096, "step": 16
                 }),
                 "aspect_ratio": ([
                     "1:1", "16:9", "5:4", "4:3", "3:2",
                     "2.39:1", "21:9", "18:9", "17:9", "1.85:1"
                 ], {"default": "1:1"}),
-                "direction": (["Horizontal", "Vertical"], {"default": "Horizontal"}),
-                "info": ("STRING", {
-                    "multiline": True,
-                    "default": "Example widths: 512, 768, 1024, 1280, 1920",
-                    "editable": False
-                })
+                "direction": (["Horizontal", "Vertical"], {"default": "Horizontal"})
             }
         }
 
@@ -29,22 +28,63 @@ class AspectRatioImageSize:
     FUNCTION = "calculate_size"
     CATEGORY = "utils"
 
-    def calculate_size(self, width, aspect_ratio, direction, info):
-        ratios = {
-            "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
-            "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
-            "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
-        }
-        w, h = ratios.get(aspect_ratio, (1, 1))
-        if direction == "Vertical":
-            w, h = h, w
-        height = int(round(width * h / w))
-        return width, height, f"{width}x{height}"
+    def calculate_size(self, width, height, aspect_ratio, direction):
+        # Priority 1: If both width and height are manually set (> 0), use them
+        if width > 0 and height > 0:
+            final_width = width
+            final_height = height
+        # Priority 2: If only width is set, calculate height from aspect ratio
+        elif width > 0 and height == 0:
+            ratios = {
+                "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
+                "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
+                "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
+            }
+            w, h = ratios.get(aspect_ratio, (1, 1))
+            if direction == "Vertical":
+                w, h = h, w
+            final_width = width
+            final_height = int(round(width * h / w))
+        # Priority 3: If only height is set, calculate width from aspect ratio
+        elif width == 0 and height > 0:
+            ratios = {
+                "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
+                "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
+                "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
+            }
+            w, h = ratios.get(aspect_ratio, (1, 1))
+            if direction == "Vertical":
+                w, h = h, w
+            final_height = height
+            final_width = int(round(height * w / h))
+        # Priority 4: Default case - both are 0, use aspect ratio with 1 megapixel
+        else:
+            import math
+            # 1 megapixel = 1,000,000 pixels
+            target_pixels = 1000000
+            
+            ratios = {
+                "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
+                "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
+                "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
+            }
+            w, h = ratios.get(aspect_ratio, (1, 1))
+            if direction == "Vertical":
+                w, h = h, w
+            
+            # Calculate dimensions for 1 megapixel with given aspect ratio
+            # width * height = target_pixels
+            # width / height = w / h
+            # So: width = sqrt(target_pixels * w / h), height = sqrt(target_pixels * h / w)
+            final_width = int(round(math.sqrt(target_pixels * w / h)))
+            final_height = int(round(math.sqrt(target_pixels * h / w)))
+            
+            # Make divisible by 16
+            final_width = int(round(final_width / 16) * 16)
+            final_height = int(round(final_height / 16) * 16)
+        
+        return final_width, final_height, f"{final_width}x{final_height}"
 
-import numpy as np
-import folder_paths
-import torch
-from PIL import Image
 
 class AspectRatioResizeImage:
     @classmethod
@@ -52,18 +92,16 @@ class AspectRatioResizeImage:
         return {
             "required": {
                 "image": ("IMAGE",),
-                "width": ("INT", {"default": 512, "min": 64, "max": 4096, "step": 16}),
+                "width": ("INT", {"default": 0, "min": 0, "max": 4096, "step": 16}),
+                "height": ("INT", {
+                    "default": 0, "min": 0, "max": 4096, "step": 16
+                }),
                 "aspect_ratio": ([
                     "1:1", "16:9", "5:4", "4:3", "3:2",
                     "2.39:1", "21:9", "18:9", "17:9", "1.85:1"
                 ], {"default": "1:1"}),
                 "direction": (["Horizontal", "Vertical"], {"default": "Horizontal"}),
-                "crop_method": (["Stretch", "Crop"], {"default": "Stretch"}),
-                "info": ("STRING", {
-                    "multiline": True,
-                    "default": "Example widths: 512, 768, 1024, 1280, 1920",
-                    "editable": False
-                })
+                "crop_method": (["Stretch", "Crop"], {"default": "Stretch"})
             }
         }
 
@@ -76,21 +114,61 @@ class AspectRatioResizeImage:
         """Round value to nearest multiple of 16"""
         return int(round(value / 16) * 16)
 
-    def resize_image(self, image, width, aspect_ratio, direction, crop_method, info):
-        # Aspect ratio dictionary
-        ratios = {
-            "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
-            "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
-            "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
-        }
-
-        w_ratio, h_ratio = ratios.get(aspect_ratio, (1, 1))
-        if direction == "Vertical":
-            w_ratio, h_ratio = h_ratio, w_ratio
-
-        # Calculate target dimensions and make them divisible by 16
-        target_height = int(round(width * h_ratio / w_ratio))
-        target_width = width
+    def resize_image(self, image, width, height, aspect_ratio, direction, crop_method):
+        # Calculate target dimensions with same priority logic as AspectRatioImageSize
+        # Priority 1: If both width and height are manually set (> 0), use them
+        if width > 0 and height > 0:
+            target_width = width
+            target_height = height
+        # Priority 2: If only width is set, calculate height from aspect ratio
+        elif width > 0 and height == 0:
+            ratios = {
+                "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
+                "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
+                "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
+            }
+            w_ratio, h_ratio = ratios.get(aspect_ratio, (1, 1))
+            if direction == "Vertical":
+                w_ratio, h_ratio = h_ratio, w_ratio
+            target_width = width
+            target_height = int(round(width * h_ratio / w_ratio))
+        # Priority 3: If only height is set, calculate width from aspect ratio
+        elif width == 0 and height > 0:
+            ratios = {
+                "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
+                "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
+                "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
+            }
+            w_ratio, h_ratio = ratios.get(aspect_ratio, (1, 1))
+            if direction == "Vertical":
+                w_ratio, h_ratio = h_ratio, w_ratio
+            target_height = height
+            target_width = int(round(height * w_ratio / h_ratio))
+        # Priority 4: Default case - both are 0, use aspect ratio with 1 megapixel
+        else:
+            import math
+            # 1 megapixel = 1,000,000 pixels
+            target_pixels = 1000000
+            
+            ratios = {
+                "1:1": (1, 1), "16:9": (16, 9), "5:4": (5, 4), "4:3": (4, 3),
+                "3:2": (3, 2), "2.39:1": (2.39, 1), "21:9": (21, 9),
+                "18:9": (18, 9), "17:9": (17, 9), "1.85:1": (1.85, 1)
+            }
+            w_ratio, h_ratio = ratios.get(aspect_ratio, (1, 1))
+            if direction == "Vertical":
+                w_ratio, h_ratio = h_ratio, w_ratio
+            
+            # Calculate dimensions for 1 megapixel with given aspect ratio
+            # width * height = target_pixels
+            # width / height = w_ratio / h_ratio
+            # So: width = sqrt(target_pixels * w_ratio / h_ratio), height = sqrt(target_pixels * h_ratio / w_ratio)
+            target_width = int(round(math.sqrt(target_pixels * w_ratio / h_ratio)))
+            target_height = int(round(math.sqrt(target_pixels * h_ratio / w_ratio)))
+            
+            # Make divisible by 16
+            target_width = int(round(target_width / 16) * 16)
+            target_height = int(round(target_height / 16) * 16)
         
         # Ensure dimensions are divisible by 16
         target_width = self.make_divisible_by_16(target_width)
