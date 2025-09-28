@@ -1,163 +1,87 @@
-# 🎨 Aspect Ratio Nodes for ComfyUI
+🎨 Aspect Ratio Nodes for ComfyUI
 
-A collection of custom nodes for ComfyUI that provide flexible aspect ratio calculations and image resizing with intelligent dimension handling.
+Smart nodes for calculating and resizing images to any aspect ratio. Supports manual size, auto 1MP sizing, crop/stretch, and horizontal/vertical orientation.
 
-## 📋 Features
+💡 Usage Examples
 
-- **Smart dimension calculation** with priority-based logic
-- **1 megapixel default sizing** for consistent file sizes across all aspect ratios
-- **Multiple aspect ratio presets** including cinematic and social media formats
-- **Automatic 16-divisible rounding** for AI model compatibility
-- **Flexible resize options** with crop or stretch methods
-- **Horizontal/Vertical direction support**
+Default 1MP:
+width=0, height=0, aspect_ratio="16:9" → ~1333x750
 
-## 🧩 Nodes Included
+Width-Based:
+width=1920, height=0, aspect_ratio="16:9" → 1920x1080
 
-### 1. **🧩 Aspect Ratio Image Size**
-Calculates width and height based on aspect ratios with intelligent priority handling.
+Manual Override:
+width=1920, height=1200, aspect_ratio="16:9" → 1920x1200
 
-**Inputs:**
-- `width` (INT): Target width (0 = auto-calculate)
-- `height` (INT): Target height (0 = auto-calculate)  
-- `aspect_ratio` (DROPDOWN): Pre-defined aspect ratios
-- `direction` (DROPDOWN): Horizontal or Vertical orientation
+Vertical Orientation:
+width=0, height=0, aspect_ratio="16:9", direction="Vertical" → ~750x1333
 
-**Outputs:**
-- `width` (INT): Calculated width
-- `height` (INT): Calculated height
-- `resolution_label` (STRING): Formatted resolution string (e.g., "1920x1080")
+🔧 Git Clone Manager
 
-### 2. **🖼️ Resize to Aspect Ratio**
-Resizes images to specific dimensions using the same intelligent sizing logic.
+Manage and clone GitHub, HuggingFace, or any Git repositories with ease. Supports custom paths, branches, submodules, and authentication tokens.
 
-**Inputs:**
-- `image` (IMAGE): Input image to resize
-- `width` (INT): Target width (0 = auto-calculate)
-- `height` (INT): Target height (0 = auto-calculate)
-- `aspect_ratio` (DROPDOWN): Pre-defined aspect ratios
-- `direction` (DROPDOWN): Horizontal or Vertical orientation
-- `crop_method` (DROPDOWN): Stretch or Crop to fit
+⚡ Key Features
 
-**Outputs:**
-- `resized_image` (IMAGE): Processed image
-- `width` (INT): Final width
-- `height` (INT): Final height
-- `resolution_label` (STRING): Formatted resolution string
+Clone Repos Anywhere: GitHub → custom_nodes/, HF → models/, or custom paths
 
-### 3. **📄 Markdown Link Generator**
-Utility node for creating markdown notes with model links and folder paths.
+Advanced Git Ops: Branch selection, shallow clones, submodules, force update
 
-## 🎯 Priority Logic
+Auth Support: HuggingFace & GitHub tokens with automatic URL handling
 
-The nodes use an intelligent 4-tier priority system:
+Professional Tools: Concurrent cloning, progress tracking, repo history, size calculation, interrupts
 
-1. **Manual Override** (`width > 0` AND `height > 0`)
-   - Uses exact dimensions provided
-   - Ignores aspect ratio settings
+Repo Info: Current branch, last commit, remote URL, clone date, total size
 
-2. **Width-Based Calculation** (`width > 0`, `height = 0`)
-   - Uses provided width
-   - Calculates height from aspect ratio
+📝 Usage Examples
 
-3. **Height-Based Calculation** (`width = 0`, `height > 0`)
-   - Uses provided height
-   - Calculates width from aspect ratio
+Clone nodes:
+https://github.com/ltdrdata/ComfyUI-Manager
+https://github.com/WASasquatch/was-node-suite-comfyui
 
-4. **1 Megapixel Default** (`width = 0`, `height = 0`)
-   - Calculates dimensions for exactly 1,000,000 pixels
-   - Uses selected aspect ratio
-   - Perfect for consistent file sizes
+Clone models with custom paths:
+https://huggingface.co/runwayml/stable-diffusion-v1-5 models/sd15
 
-## 📐 Supported Aspect Ratios
+Clone specific branches:
+branch:main https://github.com/user/experimental-node
 
-| Ratio | Description | Example Use |
-|-------|-------------|-------------|
-| **1:1** | Square | Social media posts, avatars |
-| **16:9** | Widescreen | YouTube, TV, monitors |
-| **5:4** | Classic photo | Instagram posts |
-| **4:3** | Standard photo | Traditional photography |
-| **3:2** | DSLR photo | Camera sensors |
-| **2.39:1** | Cinematic | Ultra-wide movies |
-| **21:9** | Ultra-wide | Gaming monitors |
-| **18:9** | Mobile | Modern smartphones |
-| **17:9** | Mobile wide | Some phone screens |
-| **1.85:1** | Cinema | Theater projection |
+Mixed operations:
+https://github.com/comfyanonymous/ComfyUI-3D-Pack
+https://huggingface.co/facebook/bart-large models/bart
 
-## 💡 Usage Examples
+🚀 Advantages
 
-### Example 1: Default 1 Megapixel Sizing
-```
-width = 0, height = 0, aspect_ratio = "16:9"
-→ Output: ~1333x750 (≈1 megapixel)
-```
+Easy Git-based workflow for nodes & models
 
-### Example 2: Width-Based Calculation
-```
-width = 1920, height = 0, aspect_ratio = "16:9"
-→ Output: 1920x1080
-```
+Clean interface with full repo awareness
 
-### Example 3: Manual Override
-```
-width = 1920, height = 1200, aspect_ratio = "16:9" (ignored)
-→ Output: 1920x1200
-```
+Fast batch cloning with detailed progress & history
 
-### Example 4: Vertical Orientation
-```
-width = 0, height = 0, aspect_ratio = "16:9", direction = "Vertical"
-→ Output: ~750x1333 (9:16 ratio)
-```
+Interrupt-safe and professional-grade Git handling
 
-## 🔧 Technical Details
+Perfect for managing ComfyUI nodes, models, and any Git workflow without hassle.
 
-- **Automatic 16-divisibility**: All dimensions are rounded to the nearest multiple of 16 for optimal AI model compatibility
-- **Precise calculations**: Uses mathematical formulas to ensure exact aspect ratios
-- **Memory efficient**: 1 megapixel default keeps file sizes manageable
-- **PIL integration**: High-quality image processing with LANCZOS resampling
 
-## 🚀 Installation
+🤖 HuggingFace Downloader Node
 
-### Method 1: ComfyUI Manager (Recommended)
-1. Open ComfyUI Manager
-2. Search for "Aspect Ratio Nodes"
-3. Click Install
-4. Restart ComfyUI
+Custom ComfyUI node for downloading HuggingFace models efficiently.
 
-### Method 2: Manual Installation
-1. Navigate to your ComfyUI `custom_nodes` folder
-2. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/comfyui-aspect-ratio-nodes.git
-   ```
-3. Restart ComfyUI
+⚡ Features
 
-### Method 3: Direct Download
-1. Download the repository as ZIP
-2. Extract to `ComfyUI/custom_nodes/`
-3. Restart ComfyUI
+Multi-line input for multiple links
 
-## 📱 Perfect For
+Flexible formats: url folder filename or url folder
 
-- **AI Image Generation**: Consistent dimensions for stable diffusion
-- **Social Media Content**: Pre-configured aspect ratios for different platforms
-- **Video Production**: Cinematic and broadcast aspect ratios
-- **Photography**: Standard camera and print formats
-- **Web Design**: Responsive image sizing
+Skips existing files automatically
 
-## 🤝 Contributing
+Shows download progress and file sizes
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Error handling with reports
 
-## 📄 License
+Threaded downloads for speed
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Optional auto-download toggle
 
-## 🙏 Acknowledgments
-
-- ComfyUI community for the amazing framework
-- Contributors and testers who helped improve these nodes
-
----
-
-**Made with ❤️ for the ComfyUI community**
+📝 Usage Example
+https://huggingface.co/path/to/model.safetensors unet model_name.safetensors
+https://huggingface.co/path/to/vae.safetensors vae
+https://huggingface.co/path/to/checkpoint.ckpt checkpoints my_checkpoint.ckpt
