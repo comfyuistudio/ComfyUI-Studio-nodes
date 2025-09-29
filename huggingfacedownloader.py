@@ -11,7 +11,7 @@ import folder_paths
 import logging
 
 try:
-    import plyer  # For desktop notifications
+    import plyer
     NOTIFICATIONS_AVAILABLE = True
 except ImportError:
     NOTIFICATIONS_AVAILABLE = False
@@ -63,8 +63,8 @@ class HuggingFaceDownloader:
         self.download_history = self.load_history()
         self.interrupt_flag = threading.Event()
         self.download_threads = []
+        self.filenames = {}  # Map keys to filenames for progress display
         
-        # Model type organization mapping
         self.model_type_mapping = {
             'safetensors': 'checkpoints',
             'ckpt': 'checkpoints',
@@ -94,11 +94,9 @@ class HuggingFaceDownloader:
 
     def check_interrupt(self):
         """Check if download should be interrupted"""
-        # Check internal interrupt flag
         if self.interrupt_flag.is_set():
             return True
         
-        # Check ComfyUI interrupt status if available
         if COMFYUI_INTERRUPT_AVAILABLE:
             try:
                 return execution.PromptServer.instance.client_id is None or execution.interrupt_processing
@@ -111,13 +109,13 @@ class HuggingFaceDownloader:
         """Interrupt all active downloads"""
         self.interrupt_flag.set()
         
-        # Wait for all download threads to finish
         for thread in self.download_threads:
             if thread.is_alive():
                 thread.join(timeout=2.0)
         
         self.download_threads.clear()
         self.interrupt_flag.clear()
+
     def send_notification(self, title, message, enable_notifications):
         """Send desktop notification if available and enabled"""
         if enable_notifications and NOTIFICATIONS_AVAILABLE:
@@ -140,7 +138,6 @@ class HuggingFaceDownloader:
         url = parts[0]
         folder = parts[1]
         
-        # If filename is provided, use it; otherwise extract from URL
         if len(parts) >= 3:
             filename = parts[2]
         else:
@@ -160,7 +157,6 @@ class HuggingFaceDownloader:
         if file_ext in self.model_type_mapping:
             return self.model_type_mapping[file_ext]
         
-        # Special cases for common model types
         filename_lower = filename.lower()
         if 'vae' in filename_lower:
             return 'vae'
@@ -202,39 +198,61 @@ class HuggingFaceDownloader:
             logging.warning(f"Could not get remote file info: {e}")
         return {'size': 0, 'etag': '', 'last_modified': ''}
 
+    def format_size(self, size_bytes):
+        """Format file size in human readable format"""
+        if size_bytes == 0:
+            return "0 B"
+        
+        size_names = ["B", "KB", "MB", "GB", "TB"]
+        i = 0
+        size = float(size_bytes)
+        while size >= 1024 and i < len(size_names) - 1:
+            size /= 1024.0
+            i += 1
+        
+        return f"{size:.2f} {size_names[i]}"
+
     def download_file_worker(self, download_info, enable_notifications, max_speed_mbps, enable_resume, validate_files, hf_token):
         """Worker function for downloading a single file"""
         url, filepath, key, folder, filename = download_info
         
         try:
-            self.download_status[key] = {"status": "starting", "progress": 0, "error": None, "speed": 0}
+            self.download_status[key] = {
+                "status": "starting", 
+                "progress": 0, 
+                "error": None, 
+                "speed": 0,
+                "downloaded": 0,
+                "total": 0,
+                "filename": filename
+            }
             
-            # Check for interrupt before starting
             if self.check_interrupt():
-                self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user"}
+                self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user", "filename": filename}
                 return
             
             headers = {}
             if hf_token:
                 headers['Authorization'] = f'Bearer {hf_token}'
             
-            # Check if we can resume
             resume_pos = 0
             if enable_resume and os.path.exists(filepath + ".tmp"):
                 resume_pos = os.path.getsize(filepath + ".tmp")
                 headers['Range'] = f'bytes={resume_pos}-'
             
+            print(f"[HF Downloader] Starting download: {filename}")
             response = requests.get(url, headers=headers, stream=True, timeout=30)
             
-            # Handle range request response
             if resume_pos > 0 and response.status_code == 206:
                 total_size = resume_pos + int(response.headers.get('content-length', 0))
-                mode = 'ab'  # Append mode for resume
+                mode = 'ab'
             else:
                 response.raise_for_status()
                 total_size = int(response.headers.get('content-length', 0))
-                resume_pos = 0  # Reset if range not supported
-                mode = 'wb'   # Write mode for new download
+                resume_pos = 0
+                mode = 'wb'
+            
+            print(f"[HF Downloader] {filename}: Total size = {self.format_size(total_size)}")
             
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
             temp_filepath = filepath + ".tmp"
@@ -243,16 +261,15 @@ class HuggingFaceDownloader:
             start_time = time.time()
             last_update = start_time
             
-            # Calculate speed limit in bytes per second
             speed_limit_bps = max_speed_mbps * 1024 * 1024 if max_speed_mbps > 0 else 0
             
             with open(temp_filepath, mode) as f:
                 self.download_status[key]["status"] = "downloading"
+                self.download_status[key]["total"] = total_size
                 
                 for chunk in response.iter_content(chunk_size=8192):
-                    # Check for interrupt frequently
                     if self.check_interrupt():
-                        self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user"}
+                        self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user", "filename": filename}
                         return
                     
                     if chunk:
@@ -261,13 +278,13 @@ class HuggingFaceDownloader:
                         
                         current_time = time.time()
                         
-                        # Update progress and speed
-                        if current_time - last_update >= 0.5:  # Update every 0.5 seconds for more responsive interrupts
+                        # Update status
+                        if current_time - last_update >= 0.5:
                             if total_size > 0:
                                 progress = (downloaded / total_size) * 100
                                 self.download_status[key]["progress"] = round(progress, 1)
+                                self.download_status[key]["downloaded"] = downloaded
                             
-                            # Calculate speed
                             elapsed = current_time - start_time
                             if elapsed > 0:
                                 speed_bps = (downloaded - resume_pos) / elapsed
@@ -282,17 +299,15 @@ class HuggingFaceDownloader:
                             expected_time = (downloaded - resume_pos) / speed_limit_bps
                             if elapsed < expected_time:
                                 sleep_time = expected_time - elapsed
-                                # Sleep in small chunks to allow interrupt checking
                                 sleep_chunks = max(1, int(sleep_time / 0.1))
                                 for _ in range(sleep_chunks):
                                     if self.check_interrupt():
-                                        self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user"}
+                                        self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user", "filename": filename}
                                         return
                                     time.sleep(sleep_time / sleep_chunks)
             
-            # Final interrupt check before validation
             if self.check_interrupt():
-                self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user"}
+                self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user", "filename": filename}
                 return
             
             # Validate file if requested
@@ -301,17 +316,18 @@ class HuggingFaceDownloader:
                 if actual_size != total_size:
                     raise Exception(f"File size mismatch: expected {total_size}, got {actual_size}")
             
-            # Move temp file to final location
             if os.path.exists(filepath):
-                os.remove(filepath)  # Remove existing file if any
+                os.remove(filepath)
             os.rename(temp_filepath, filepath)
+            
+            file_size = os.path.getsize(filepath)
             
             # Update history
             file_info = {
                 'url': url,
                 'folder': folder,
                 'filename': filename,
-                'size': os.path.getsize(filepath),
+                'size': file_size,
                 'download_date': datetime.now().isoformat(),
                 'hash': self.calculate_file_hash(filepath) if validate_files else None
             }
@@ -321,9 +337,14 @@ class HuggingFaceDownloader:
                 "status": "completed", 
                 "progress": 100, 
                 "error": None,
-                "size": os.path.getsize(filepath),
-                "speed": 0
+                "size": file_size,
+                "speed": 0,
+                "filename": filename,
+                "downloaded": file_size,
+                "total": file_size
             }
+            
+            print(f"[HF Downloader] ✓ {filename}: Download complete! ({self.format_size(file_size)})")
             
             self.send_notification(
                 "Download Complete", 
@@ -333,15 +354,18 @@ class HuggingFaceDownloader:
             
         except Exception as e:
             if self.check_interrupt():
-                self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user"}
+                self.download_status[key] = {"status": "interrupted", "progress": 0, "error": "Download interrupted by user", "filename": filename}
             else:
                 error_msg = str(e)
                 self.download_status[key] = {
                     "status": "error", 
                     "progress": 0, 
                     "error": error_msg,
-                    "speed": 0
+                    "speed": 0,
+                    "filename": filename
                 }
+                
+                print(f"[HF Downloader] ✗ {filename}: Download failed - {error_msg}")
                 
                 self.send_notification(
                     "Download Failed", 
@@ -349,7 +373,6 @@ class HuggingFaceDownloader:
                     enable_notifications
                 )
             
-            # Clean up temp file if not resuming or interrupted
             temp_filepath = filepath + ".tmp"
             if os.path.exists(temp_filepath) and (not enable_resume or self.check_interrupt()):
                 try:
@@ -362,26 +385,21 @@ class HuggingFaceDownloader:
         active_threads = []
         
         while not self.download_queue.empty() or active_threads:
-            # Check for interrupt
             if self.check_interrupt():
-                # Cancel remaining downloads in queue
                 while not self.download_queue.empty():
                     try:
                         self.download_queue.get_nowait()
                     except:
                         break
                 
-                # Wait for active downloads to stop
                 for thread in active_threads:
                     if thread.is_alive():
                         thread.join(timeout=1.0)
                 
                 break
             
-            # Clean up completed threads
             active_threads = [t for t in active_threads if t.is_alive()]
             
-            # Start new downloads if under limit
             while len(active_threads) < max_concurrent and not self.download_queue.empty():
                 if self.check_interrupt():
                     break
@@ -396,20 +414,7 @@ class HuggingFaceDownloader:
                 active_threads.append(thread)
                 self.download_threads.append(thread)
             
-            time.sleep(0.1)  # Small delay to prevent busy waiting
-
-    def format_size(self, size_bytes):
-        """Format file size in human readable format"""
-        if size_bytes == 0:
-            return "0 B"
-        
-        size_names = ["B", "KB", "MB", "GB", "TB"]
-        i = 0
-        while size_bytes >= 1024 and i < len(size_names) - 1:
-            size_bytes /= 1024.0
-            i += 1
-        
-        return f"{size_bytes:.1f} {size_names[i]}"
+            time.sleep(0.1)
 
     def get_download_history_summary(self):
         """Get formatted download history summary"""
@@ -429,6 +434,25 @@ class HuggingFaceDownloader:
         history_lines.append(f"\nTotal downloaded: {len(self.download_history)} files ({self.format_size(total_size)})")
         return "\n".join(history_lines)
 
+    def get_live_progress(self):
+        """Get live progress string for all active downloads"""
+        progress_lines = []
+        for key, status in self.download_status.items():
+            if status['status'] == 'downloading':
+                filename = status.get('filename', 'Unknown')
+                progress = status.get('progress', 0)
+                speed = status.get('speed', 0)
+                downloaded = status.get('downloaded', 0)
+                total = status.get('total', 0)
+                
+                progress_lines.append(
+                    f"⬇ {filename}: {progress:.1f}% "
+                    f"({self.format_size(downloaded)}/{self.format_size(total)}) "
+                    f"@ {speed:.2f} MB/s"
+                )
+        
+        return "\n".join(progress_lines) if progress_lines else ""
+
     def download_models(self, download_links, auto_download, max_concurrent_downloads, 
                        max_download_speed_mbps, enable_resume, validate_files, 
                        enable_notifications, auto_organize, hf_token=""):
@@ -439,9 +463,8 @@ class HuggingFaceDownloader:
             return ("No download links provided", self.get_download_history_summary())
         
         results = []
-        
-        # Clear previous download status
         self.download_status.clear()
+        self.filenames.clear()
         
         for i, line in enumerate(lines):
             url, folder, filename, error = self.parse_download_line(line)
@@ -450,19 +473,14 @@ class HuggingFaceDownloader:
                 results.append(f"Line {i+1}: ERROR - {error}")
                 continue
             
-            # Get organized folder if auto-organize is enabled
             final_folder = self.get_organized_folder(folder, filename, auto_organize)
-            
-            # Construct full file path
             folder_path = os.path.join(self.base_models_path, final_folder)
             filepath = os.path.join(folder_path, filename)
             
-            # Check if file already exists and validate
             if os.path.exists(filepath):
                 file_size = os.path.getsize(filepath)
                 
                 if validate_files:
-                    # Get remote file info for validation
                     remote_info = self.get_remote_file_info(url, hf_token)
                     if remote_info['size'] > 0 and file_size != remote_info['size']:
                         results.append(f"⚠ {filename}: Size mismatch, will re-download")
@@ -477,16 +495,16 @@ class HuggingFaceDownloader:
                 results.append(f"⏸ {filename}: Ready to download (auto_download disabled)")
                 continue
             
-            # Add to download queue
             key = f"download_{i}"
+            self.filenames[key] = filename
             self.download_queue.put((url, filepath, key, final_folder, filename))
         
         if auto_download and not self.download_queue.empty():
-            # Clear interrupt flag and download threads list
+            print(f"\n[HF Downloader] Starting {self.download_queue.qsize()} download(s) with {max_concurrent_downloads} concurrent connection(s)")
+            
             self.interrupt_flag.clear()
             self.download_threads.clear()
             
-            # Start queue manager
             queue_thread = threading.Thread(
                 target=self.download_queue_manager,
                 args=(max_concurrent_downloads, enable_notifications, max_download_speed_mbps, 
@@ -495,26 +513,21 @@ class HuggingFaceDownloader:
             queue_thread.daemon = True
             queue_thread.start()
             
-            # Monitor downloads with interrupt checking
+            last_progress_time = time.time()
             while queue_thread.is_alive():
                 if self.check_interrupt():
                     self.interrupt_downloads()
                     break
                 
-                time.sleep(0.5)  # Check more frequently for interrupts
+                current_time = time.time()
+                if current_time - last_progress_time >= 5.0:
+                    progress_str = self.get_live_progress()
+                    if progress_str:
+                        print(f"\n{progress_str}")
+                    last_progress_time = current_time
                 
-                # Update results with current status
-                in_progress = []
-                for key, status in self.download_status.items():
-                    if status['status'] == 'downloading':
-                        progress = status.get('progress', 0)
-                        speed = status.get('speed', 0)
-                        in_progress.append(f"⬇ Download {key}: {progress}% ({speed} MB/s)")
-                
-                if in_progress:
-                    print(f"Downloads in progress: {len(in_progress)}")
+                time.sleep(0.5)
             
-            # Wait for queue thread to finish
             queue_thread.join(timeout=2.0)
             
             # Collect final results
@@ -533,17 +546,14 @@ class HuggingFaceDownloader:
                     error_msg = status_info.get("error", "Unknown error")
                     results.append(f"✗ {filename}: Download failed - {error_msg}")
         
-        # Save history
         self.save_history()
         
-        # Format final report
         total_files = len(lines)
         successful = len([r for r in results if r.startswith("✓") and "Downloaded successfully" in r])
         failed = len([r for r in results if r.startswith("✗")])
         interrupted = len([r for r in results if "interrupted" in r])
         skipped = len([r for r in results if "Already exists" in r])
         
-        # Send completion notification
         if auto_download and successful > 0:
             self.send_notification(
                 "Downloads Complete",
@@ -568,7 +578,6 @@ Details:
         
         return (summary, self.get_download_history_summary())
 
-# Node registration
 NODE_CLASS_MAPPINGS = {
     "HuggingFaceDownloader": HuggingFaceDownloader
 }
