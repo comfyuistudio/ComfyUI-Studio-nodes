@@ -1,8 +1,8 @@
 {
   "id": "85e071b8-e34e-4263-aff6-ecd6c6ddb4ba",
   "revision": 0,
-  "last_node_id": 41,
-  "last_link_id": 36,
+  "last_node_id": 43,
+  "last_link_id": 38,
   "nodes": [
     {
       "id": 13,
@@ -107,7 +107,7 @@
         "Node name for S&R": "easy showAnything"
       },
       "widgets_values": [
-        "910"
+        "512"
       ]
     },
     {
@@ -152,8 +152,8 @@
       "id": 22,
       "type": "easy showAnything",
       "pos": [
-        1220,
-        -100
+        610,
+        770
       ],
       "size": [
         240,
@@ -190,8 +190,8 @@
       "id": 18,
       "type": "MarkdownNote",
       "pos": [
-        1480,
-        -100
+        870,
+        770
       ],
       "size": [
         320,
@@ -213,8 +213,8 @@
       "id": 27,
       "type": "MarkdownModelNote",
       "pos": [
-        920,
-        -100
+        310,
+        770
       ],
       "size": [
         281.1412048339844,
@@ -382,201 +382,18 @@
       ]
     },
     {
-      "id": 37,
-      "type": "Note",
-      "pos": [
-        -1010,
-        570
-      ],
-      "size": [
-        420,
-        100
-      ],
-      "flags": {},
-      "order": 5,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "# Download a model in a specific folder\nhttps://huggingface.co/model/file.safetensors checkpoints\n\n# Download a model in a specific folder and a custom name\nhttps://huggingface.co/vae/vae.safetensors vae custom_vae.safetensors"
-      ],
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 34,
-      "type": "easy showAnything",
-      "pos": [
-        -10,
-        -140
-      ],
-      "size": [
-        140,
-        26
-      ],
-      "flags": {},
-      "order": 15,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "anything",
-          "shape": 7,
-          "type": "*",
-          "link": 33
-        }
-      ],
-      "outputs": [
-        {
-          "name": "output",
-          "type": "*",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfyui-easy-use",
-        "ver": "66143b0e2077021253246500043f1b79da295399",
-        "Node name for S&R": "easy showAnything"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 32,
-      "type": "GitCloneManager",
-      "pos": [
-        -580,
-        -140
-      ],
-      "size": [
-        560,
-        470
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "clone_report",
-          "type": "STRING",
-          "links": [
-            33
-          ]
-        },
-        {
-          "name": "repository_list",
-          "type": "STRING",
-          "links": [
-            34
-          ]
-        }
-      ],
-      "properties": {
-        "aux_id": "comfyuistudio/ComfyUI-Studio-nodes",
-        "ver": "a8a66ca268e01b5d6f683fc4004c62c61d9f9155",
-        "Node name for S&R": "GitCloneManager"
-      },
-      "widgets_values": [
-        "",
-        true,
-        2,
-        0,
-        true,
-        false,
-        false,
-        "",
-        "",
-        [
-          false,
-          true
-        ]
-      ]
-    },
-    {
-      "id": 35,
-      "type": "easy showAnything",
-      "pos": [
-        -10,
-        120
-      ],
-      "size": [
-        140,
-        26
-      ],
-      "flags": {},
-      "order": 16,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "anything",
-          "shape": 7,
-          "type": "*",
-          "link": 34
-        }
-      ],
-      "outputs": [
-        {
-          "name": "output",
-          "type": "*",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfyui-easy-use",
-        "ver": "66143b0e2077021253246500043f1b79da295399",
-        "Node name for S&R": "easy showAnything"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 38,
-      "type": "easy showAnything",
-      "pos": [
-        -10,
-        840
-      ],
-      "size": [
-        140,
-        26
-      ],
-      "flags": {},
-      "order": 18,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "anything",
-          "shape": 7,
-          "type": "*",
-          "link": 36
-        }
-      ],
-      "outputs": [
-        {
-          "name": "output",
-          "type": "*",
-          "links": null
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfyui-easy-use",
-        "ver": "66143b0e2077021253246500043f1b79da295399",
-        "Node name for S&R": "easy showAnything"
-      },
-      "widgets_values": []
-    },
-    {
       "id": 39,
       "type": "easy showAnything",
       "pos": [
-        -10,
-        570
+        -330,
+        470
       ],
       "size": [
-        140,
-        26
+        560,
+        250
       ],
       "flags": {},
-      "order": 17,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
@@ -598,75 +415,61 @@
         "ver": "66143b0e2077021253246500043f1b79da295399",
         "Node name for S&R": "easy showAnything"
       },
-      "widgets_values": []
+      "widgets_values": [
+        "No download links provided"
+      ]
     },
     {
-      "id": 40,
-      "type": "Label (rgthree)",
+      "id": 38,
+      "type": "easy showAnything",
       "pos": [
-        -1020,
-        -230
+        -330,
+        770
       ],
       "size": [
-        890.490234375,
-        36
-      ],
-      "flags": {
-        "allow_interaction": true
-      },
-      "order": 7,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "Git clone Huggingface folder, or Git clone custom nodes",
-      "properties": {
-        "fontSize": 36,
-        "fontFamily": "Arial",
-        "fontColor": "#ffffff",
-        "textAlign": "left",
-        "backgroundColor": "transparent",
-        "padding": 0,
-        "borderRadius": 0
-      },
-      "color": "#fff0",
-      "bgcolor": "#fff0"
-    },
-    {
-      "id": 36,
-      "type": "Note",
-      "pos": [
-        -1020,
-        -140
-      ],
-      "size": [
-        430,
-        240
+        560,
+        270
       ],
       "flags": {},
-      "order": 8,
+      "order": 16,
       "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "# Clone custom nodes\nhttps://github.com/ltdrdata/ComfyUI-Manager\nhttps://github.com/WASasquatch/was-node-suite-comfyui\n\n# Clone Full HuggingFace model folders with custom paths  \nhttps://huggingface.co/runwayml/stable-diffusion-v1-5 models/sd15\nhttps://huggingface.co/openai/whisper-large models/whisper\n\n# Clone specific branches\nbranch:main https://github.com/user/experimental-node\nbranch:v2.0 https://github.com/user/stable-node custom_nodes/stable\n\n# Mixed operations\nhttps://github.com/comfyanonymous/ComfyUI-3D-Pack\nhttps://huggingface.co/facebook/bart-large models/bart\nbranch:development https://github.com/user/beta-features"
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 36
+        }
       ],
-      "color": "#432",
-      "bgcolor": "#653"
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "66143b0e2077021253246500043f1b79da295399",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "=== DOWNLOAD HISTORY ===\n2025-09-29 15:25:38 | flux_vae.safetensors | 319.77 MB | vae222522/\n2025-09-29 15:14:21 | flux_vae.safetensors | 319.77 MB | vae22222/\n2025-09-29 15:10:21 | flux_vae.safetensors | 319.77 MB | vae2222/\n2025-09-29 15:07:34 | flux_vae.safetensors | 319.77 MB | vae222/\n2025-09-29 15:03:56 | flux_vae.safetensors | 319.77 MB | vae22/\n2025-09-29 13:58:37 | lotus-depth-g-v2-0-disparity.safetensors | 3.23 GB | unet/\n2025-09-29 13:53:30 | comfyui_local_lora16.safetensors | 146.17 MB | loras/\n2025-09-29 13:53:14 | Hyper-FLUX.1-dev-8steps-lora.safetensors | 1.29 GB | loras/\n2025-09-29 13:51:08 | uncensored-flux-lora | 655.63 MB | loras/FLUX/\n2025-09-29 13:50:08 | flux_vae.safetensors | 319.77 MB | vae/\n2025-09-29 13:49:38 | clip_l.safetensors | 234.74 MB | clip/\n2025-09-28 16:51:11 | IndexTTS-2 | 79.33 KB | TTTTTTSSSSS/\n2025-09-28 15:56:28 | flux_vae1.safetensors | 319.77 MB | vae/\n2025-09-28 15:44:48 | fff2 | 319.77 MB | vae/\n2025-09-28 15:43:49 | fff | 319.77 MB | vae/\n\nTotal downloaded: 15 files (8.35 GB)"
+      ]
     },
     {
       "id": 33,
       "type": "HuggingFaceDownloader",
       "pos": [
-        -580,
-        560
+        -330,
+        -140
       ],
       "size": [
         560,
         560
       ],
       "flags": {},
-      "order": 9,
+      "order": 5,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -707,14 +510,219 @@
       ]
     },
     {
+      "id": 37,
+      "type": "Note",
+      "pos": [
+        -330,
+        -290
+      ],
+      "size": [
+        560,
+        100
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "# Download a model in a specific folder\nhttps://huggingface.co/model/file.safetensors checkpoints\n\n# Download a model in a specific folder and a custom name\nhttps://huggingface.co/vae/vae.safetensors vae custom_vae.safetensors"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
       "id": 41,
       "type": "Label (rgthree)",
       "pos": [
-        -1000,
-        490
+        -310,
+        -370
       ],
       "size": [
         518.326171875,
+        36
+      ],
+      "flags": {
+        "allow_interaction": true
+      },
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "HuggingFace model downloader",
+      "properties": {
+        "fontSize": 36,
+        "fontFamily": "Arial",
+        "fontColor": "#ffffff",
+        "textAlign": "left",
+        "backgroundColor": "transparent",
+        "padding": 0,
+        "borderRadius": 0
+      },
+      "color": "#fff0",
+      "bgcolor": "#fff0"
+    },
+    {
+      "id": 32,
+      "type": "GitCloneManager",
+      "pos": [
+        -1000,
+        -140
+      ],
+      "size": [
+        560,
+        470
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "clone_report",
+          "type": "STRING",
+          "links": [
+            37
+          ]
+        },
+        {
+          "name": "repository_list",
+          "type": "STRING",
+          "links": [
+            38
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "comfyuistudio/ComfyUI-Studio-nodes",
+        "ver": "a8a66ca268e01b5d6f683fc4004c62c61d9f9155",
+        "Node name for S&R": "GitCloneManager"
+      },
+      "widgets_values": [
+        "",
+        true,
+        2,
+        0,
+        true,
+        false,
+        false,
+        "",
+        "",
+        [
+          false,
+          true
+        ]
+      ]
+    },
+    {
+      "id": 42,
+      "type": "easy showAnything",
+      "pos": [
+        -1000,
+        380
+      ],
+      "size": [
+        560,
+        250
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "66143b0e2077021253246500043f1b79da295399",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "No download links provided"
+      ]
+    },
+    {
+      "id": 43,
+      "type": "easy showAnything",
+      "pos": [
+        -1000,
+        680
+      ],
+      "size": [
+        560,
+        270
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 38
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "66143b0e2077021253246500043f1b79da295399",
+        "Node name for S&R": "easy showAnything"
+      },
+      "widgets_values": [
+        "=== DOWNLOAD HISTORY ===\n2025-09-29 15:25:38 | flux_vae.safetensors | 319.77 MB | vae222522/\n2025-09-29 15:14:21 | flux_vae.safetensors | 319.77 MB | vae22222/\n2025-09-29 15:10:21 | flux_vae.safetensors | 319.77 MB | vae2222/\n2025-09-29 15:07:34 | flux_vae.safetensors | 319.77 MB | vae222/\n2025-09-29 15:03:56 | flux_vae.safetensors | 319.77 MB | vae22/\n2025-09-29 13:58:37 | lotus-depth-g-v2-0-disparity.safetensors | 3.23 GB | unet/\n2025-09-29 13:53:30 | comfyui_local_lora16.safetensors | 146.17 MB | loras/\n2025-09-29 13:53:14 | Hyper-FLUX.1-dev-8steps-lora.safetensors | 1.29 GB | loras/\n2025-09-29 13:51:08 | uncensored-flux-lora | 655.63 MB | loras/FLUX/\n2025-09-29 13:50:08 | flux_vae.safetensors | 319.77 MB | vae/\n2025-09-29 13:49:38 | clip_l.safetensors | 234.74 MB | clip/\n2025-09-28 16:51:11 | IndexTTS-2 | 79.33 KB | TTTTTTSSSSS/\n2025-09-28 15:56:28 | flux_vae1.safetensors | 319.77 MB | vae/\n2025-09-28 15:44:48 | fff2 | 319.77 MB | vae/\n2025-09-28 15:43:49 | fff | 319.77 MB | vae/\n\nTotal downloaded: 15 files (8.35 GB)"
+      ]
+    },
+    {
+      "id": 36,
+      "type": "Note",
+      "pos": [
+        -1000,
+        -430
+      ],
+      "size": [
+        560,
+        240
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "# Clone custom nodes\nhttps://github.com/ltdrdata/ComfyUI-Manager\nhttps://github.com/WASasquatch/was-node-suite-comfyui\n\n# Clone Full HuggingFace model folders with custom paths  \nhttps://huggingface.co/runwayml/stable-diffusion-v1-5 models/sd15\nhttps://huggingface.co/openai/whisper-large models/whisper\n\n# Clone specific branches\nbranch:main https://github.com/user/experimental-node\nbranch:v2.0 https://github.com/user/stable-node custom_nodes/stable\n\n# Mixed operations\nhttps://github.com/comfyanonymous/ComfyUI-3D-Pack\nhttps://huggingface.co/facebook/bart-large models/bart\nbranch:development https://github.com/user/beta-features"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 40,
+      "type": "Label (rgthree)",
+      "pos": [
+        -1130,
+        -540
+      ],
+      "size": [
+        890.490234375,
         36
       ],
       "flags": {
@@ -724,7 +732,7 @@
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "HuggingFace model downloader",
+      "title": "Git clone Huggingface folder, or Git clone custom nodes",
       "properties": {
         "fontSize": 36,
         "fontFamily": "Arial",
@@ -780,22 +788,6 @@
       "IMAGE"
     ],
     [
-      33,
-      32,
-      0,
-      34,
-      0,
-      "*"
-    ],
-    [
-      34,
-      32,
-      1,
-      35,
-      0,
-      "*"
-    ],
-    [
       35,
       33,
       0,
@@ -808,6 +800,22 @@
       33,
       1,
       38,
+      0,
+      "*"
+    ],
+    [
+      37,
+      32,
+      0,
+      42,
+      0,
+      "*"
+    ],
+    [
+      38,
+      32,
+      1,
+      43,
       0,
       "*"
     ]
@@ -843,8 +851,8 @@
       "id": 3,
       "title": "markdown note link generator",
       "bounding": [
-        910,
-        -170,
+        300,
+        700,
         900,
         310
       ],
