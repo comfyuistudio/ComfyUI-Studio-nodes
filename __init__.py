@@ -34,4 +34,3 @@ NODE_CATEGORIES = {
     "GitCloneManager": "STUDIO NODES",
     "TransparentVideoSave": "STUDIO NODES",
 }
-
